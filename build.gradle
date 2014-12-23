@@ -1,0 +1,162 @@
+group = 'org.venus'
+version = "$applicationVersion"
+
+apply plugin: 'war'
+apply plugin: 'eclipse-wtp'
+sourceCompatibility = 1.7
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    // third-party library versions
+    SLF4J_VERSION = '1.7.7' 
+    LOGBACK_VERSION = '1.1.2'
+
+    SPRING_VERSION = '4.1.2.RELEASE'
+    SPRING_SECURITY_VERSION = '3.2.5.RELEASE'
+    SPRING_DATA_JPA_VERSION = '1.7.1.RELEASE'
+
+    //QUERYDSL_VERSION = '3.6.0'
+    //GOOGLE_GUAVA_VERSION = '18.0'
+
+    HIBERNATE_VERSION = '4.3.7.Final'
+    HIBERNATE_VALIDATOR_VERSION = '5.1.3.Final'
+
+    //LIQUIBASE_VERSION = '3.1.1'
+
+    //SITEMESH_VERSION = '3.0.0'
+    //DISPLAYTAG_VERSION = '1.2'
+
+    SLF4J_VERSION = '1.7.7' 
+    LOGBACK_VERSION = '1.1.2'
+
+    JAVAX_VALIDATION_VERSION = '1.1.0.Final'
+    JAVA_EE_WEB_VERSION = '7.0'
+
+    JUNIT_VERSION = '4.11'
+    MOCKITO_VERSION = '1.10.8'
+    HSQLDB_VERSION = '2.3.2'
+    JAVAX_EL_VERSION = '3.0.0'
+    GLASSFISH_JAVAX_EL_VERSION = '3.0.0'
+}
+
+dependencies {
+    // spring
+    compile("org.springframework:spring-context:$SPRING_VERSION") {exclude group: 'commons-logging'} 
+    compile("org.springframework.data:spring-data-jpa:$SPRING_DATA_JPA_VERSION") {exclude group: 'commons-logging'}
+    runtime("org.springframework:spring-aspects:$SPRING_VERSION") // needed by Spring JPA auditing
+    // Explicitly using 4.x version of spring-orm, to override spring-data-jpa's dependency on 3.2 version.
+    // This will also pull in 4.x versions of spring-jdbc and spring-tx.  
+    compile("org.springframework:spring-orm:$SPRING_VERSION") {exclude group: 'commons-logging'}
+
+    // hibernate  
+    compile "org.hibernate:hibernate-entitymanager:$HIBERNATE_VERSION"
+
+    compile "org.slf4j:slf4j-api:$SLF4J_VERSION"
+
+    compile "javax.validation:validation-api:$JAVAX_VALIDATION_VERSION"
+
+    // for test compiling and execution
+    testCompile "junit:junit:$JUNIT_VERSION"
+    testCompile "org.mockito:mockito-all:$MOCKITO_VERSION"
+    testCompile "org.hsqldb:hsqldb:$HSQLDB_VERSION"
+    testCompile("org.springframework:spring-test:$SPRING_VERSION") {exclude group: 'commons-logging'}    
+    testRuntime "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
+
+    //compile("org.liquibase:liquibase-core:$LIQUIBASE_VERSION") {exclude group: 'org.eclipse.jetty'}
+
+    // bean validation implementation needed in runtime
+    runtime "org.hibernate:hibernate-validator:$HIBERNATE_VALIDATOR_VERSION"
+    // bean validation has a javax.el dependency; available in JEE servers but must be added for junits
+    testRuntime "javax.el:javax.el-api:$JAVAX_EL_VERSION"
+    testRuntime "org.glassfish:javax.el:$GLASSFISH_JAVAX_EL_VERSION"
+
+    // QueryDSL libraries. It uses Google Guava 14, which throws a CDI error during JEE deployment. So we are 
+    // explicitly giving a dependency to Google Guava 17 instead.
+    //querydslapt "com.mysema.querydsl:querydsl-apt:$QUERYDSL_VERSION"
+    //compile "com.mysema.querydsl:querydsl-jpa:$QUERYDSL_VERSION"
+    //compile "com.google.guava:guava:$GOOGLE_GUAVA_VERSION"
+
+    //compile 'org.codehaus.groovy:groovy-all:2.3.4'
+
+    // spring-mvc
+    compile("org.springframework:spring-webmvc:$SPRING_VERSION") {exclude group: 'commons-logging'}
+
+    // spring-security
+    compile("org.springframework.security:spring-security-core:$SPRING_SECURITY_VERSION") {transitive = false}
+    compile("org.springframework.security:spring-security-config:$SPRING_SECURITY_VERSION") {transitive = false}
+    compile("org.springframework.security:spring-security-web:$SPRING_SECURITY_VERSION") {transitive = false}
+    compile("org.springframework.security:spring-security-taglibs:$SPRING_SECURITY_VERSION") {transitive = false}
+
+    compile 'jstl:jstl:1.2'
+
+    providedCompile 'org.jboss.spec.javax.servlet:jboss-servlet-api_3.1_spec:1.0.0.Final'
+    providedCompile "javax:javaee-web-api:$JAVA_EE_WEB_VERSION"
+}
+
+// disables javac compile warnings - because Spring's PropertySource gives a "java.lang.annotation.Repeatable not found" warning
+// which messes up the jenkins console. Should be all right because the IDE will give javac warnings anyway.
+compileJava.options.compilerArgs = ['-Xlint:none']
+
+// setup for integration testing as recommended in Gradle in Action book. A new source set path called integrationtest is defined,
+// i.e. integration test classes should be under src/integrationtest/java.
+sourceSets {
+    integrationtest {
+        java.srcDir file('src/integrationtest/java')
+        resources.srcDir file('src/integrationtest/resources')
+        compileClasspath = sourceSets.main.output + configurations.testRuntime
+        runtimeClasspath = output + compileClasspath
+    }
+}
+
+// To execute the integration tests, run "gradle integrationTest". (Unit tests should be run using "gradle test" as usual.)
+task integrationTest(type: Test) {
+    testClassesDir = sourceSets.integrationtest.output.classesDir
+    classpath = sourceSets.integrationtest.runtimeClasspath
+    reports.junitXml.destination = file('build/integration-test-results')
+    reports.html.destination = file('build/reports/integration-tests')
+    testLogging {
+        showStandardStreams = true
+        events "started", "passed", "skipped", "failed"
+        exceptionFormat "short"
+        info {
+            events "started", "skipped", "failed"
+            exceptionFormat "full"
+        }
+    }
+}
+
+build.dependsOn { integrationTest }
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource, sourceSets.test.allSource, sourceSets.integrationtest.allSource
+}
+
+test {
+    testLogging {
+        showStandardStreams = true
+        events "started", "passed", "skipped", "failed"
+        exceptionFormat "short"
+        info {
+            events "started", "skipped", "failed"
+            exceptionFormat "full"
+        }
+    }
+}
+
+eclipse {
+    classpath {
+        // default settings for downloading sources and Javadoc
+        downloadSources = true
+        downloadJavadoc = false
+    }
+}
+
+
+task printSystemEnv << {
+    System.env.each {
+        println it
+    }
+}
