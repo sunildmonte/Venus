@@ -29,9 +29,6 @@ ext {
     //SITEMESH_VERSION = '3.0.0'
     //DISPLAYTAG_VERSION = '1.2'
 
-    SLF4J_VERSION = '1.7.7' 
-    LOGBACK_VERSION = '1.1.2'
-
     JAVAX_VALIDATION_VERSION = '1.1.0.Final'
     JAVA_EE_WEB_VERSION = '7.0'
 
@@ -55,7 +52,8 @@ dependencies {
     compile "org.hibernate:hibernate-entitymanager:$HIBERNATE_VERSION"
 
     compile "org.slf4j:slf4j-api:$SLF4J_VERSION"
-
+	compile "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
+	
     compile "javax.validation:validation-api:$JAVAX_VALIDATION_VERSION"
 
     // for test compiling and execution
@@ -63,7 +61,7 @@ dependencies {
     testCompile "org.mockito:mockito-all:$MOCKITO_VERSION"
     testCompile "org.hsqldb:hsqldb:$HSQLDB_VERSION"
     testCompile("org.springframework:spring-test:$SPRING_VERSION") {exclude group: 'commons-logging'}    
-    testRuntime "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
+    //testRuntime "ch.qos.logback:logback-classic:$LOGBACK_VERSION"
 
     //compile("org.liquibase:liquibase-core:$LIQUIBASE_VERSION") {exclude group: 'org.eclipse.jetty'}
 
