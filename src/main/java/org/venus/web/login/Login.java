@@ -1,4 +1,4 @@
-package org.venus.web.security;
+package org.venus.web.login;
 
 /**
  * Simple bean used as the model for the login page.

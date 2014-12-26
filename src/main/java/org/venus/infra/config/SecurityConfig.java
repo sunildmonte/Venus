@@ -4,6 +4,7 @@ import javax.servlet.Filter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -13,11 +14,14 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.servlet.configuration.EnableWebMvcSecurity;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.venus.web.security.AuthenticationFilter;
-import org.venus.web.security.SSOAuthSucessHandler;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.venus.infra.web.security.AuthenticationFilter;
+import org.venus.infra.web.security.sso.SSOAuthSucessHandler;
+import org.venus.infra.web.security.sso.SSOLogoutSuccessHandler;
 
 
 @Configuration
+@ComponentScan("org.venus.infra.web.security")
 @EnableWebSecurity(debug = true) // have put this only to enable the debugging. should be commented out later.
 @EnableWebMvcSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
@@ -47,10 +51,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	            .loginPage("/login") 
 	            .permitAll()
 	            .successHandler(ssoSuccessHandler())
-	            //.defaultSuccessUrl("/home")
-	            ;
-	            //.and()
-	        //.addFilter(customAuthFilter());
+	            .and()
+	        .logout()
+	        	.logoutSuccessHandler(ssoLogoutHandler())
+	         ;
+
+	    
+	    //.addFilter(customAuthFilter());
 	            //.addFilterAfter(customAuthFilter(), UsernamePasswordAuthenticationFilter.class);
 	}
 	
@@ -65,7 +72,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public AuthenticationSuccessHandler ssoSuccessHandler() {
 		return new SSOAuthSucessHandler("/home");
 	}
-	
+
+	@Bean
+	public LogoutSuccessHandler ssoLogoutHandler() {
+		SSOLogoutSuccessHandler handler = new SSOLogoutSuccessHandler();
+		handler.setDefaultTargetUrl("/login");
+		return handler;
+	}
+
 //	@Bean
 //	public AuthenticationManager authenticationManager() {
 //		try {

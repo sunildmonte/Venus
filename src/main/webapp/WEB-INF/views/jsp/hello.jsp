@@ -7,7 +7,7 @@
 
 <head>
 	<title>
-    	Welcome to eGov OS!
+    	Welcome!
 	</title>
 </head>
 
