@@ -11,8 +11,10 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.servlet.configuration.EnableWebMvcSecurity;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.venus.web.security.AuthenticationFilter;
+import org.venus.web.security.SSOAuthSucessHandler;
 
 
 @Configuration
@@ -44,16 +46,24 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	        .formLogin()
 	            .loginPage("/login") 
 	            .permitAll()
-	            .and()
+	            .successHandler(ssoSuccessHandler())
+	            //.defaultSuccessUrl("/home")
+	            ;
+	            //.and()
 	        //.addFilter(customAuthFilter());
-	            .addFilterAfter(customAuthFilter(), UsernamePasswordAuthenticationFilter.class);
+	            //.addFilterAfter(customAuthFilter(), UsernamePasswordAuthenticationFilter.class);
 	}
 	
+//	@Bean
+//	public Filter customAuthFilter() {
+//		AuthenticationFilter af = new AuthenticationFilter();
+//		//af.setAuthenticationManager(authenticationManager());
+//		return af;
+//	}
+	
 	@Bean
-	public Filter customAuthFilter() {
-		AuthenticationFilter af = new AuthenticationFilter();
-		//af.setAuthenticationManager(authenticationManager());
-		return af;
+	public AuthenticationSuccessHandler ssoSuccessHandler() {
+		return new SSOAuthSucessHandler("/home");
 	}
 	
 //	@Bean

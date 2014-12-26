@@ -7,22 +7,29 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.view.RedirectView;
 
 @Controller
-@RequestMapping("/login")
+//@RequestMapping("/login")
 public class LoginController {
 
     /** Login page view, resolved to /WEB-INF/views/login.jsp. **/
     private static final String LOGIN_PAGE_VIEW_NAME = "login/login-page";
 
-//    @RequestMapping("/")
+    private static final String LANDING_PAGE_VIEW_NAME = "login/landing-page";
+
+    //    @RequestMapping("/")
 //    public RedirectView rootPath() {
 //        RedirectView rv = new RedirectView(LOGIN_PAGE_URL, true);
 //        return rv;
 //    }
     
-	@RequestMapping(method = RequestMethod.GET)
+	@RequestMapping(value = "/login", method = RequestMethod.GET)
     public String displayLoginPage(Model model) {
         model.addAttribute("login", new Login());
         return LOGIN_PAGE_VIEW_NAME;
+    }
+
+	@RequestMapping(value = "/home", method = RequestMethod.GET)
+    public String displayLandingPage() {
+        return LANDING_PAGE_VIEW_NAME;
     }
 
 }
