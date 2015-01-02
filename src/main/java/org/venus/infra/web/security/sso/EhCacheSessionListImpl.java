@@ -1,6 +1,7 @@
 package org.venus.infra.web.security.sso;
 
 import java.util.List;
+import java.util.Map;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
@@ -23,6 +24,7 @@ public class EhCacheSessionListImpl implements SSOActiveSessionList {
 	public EhCacheSessionListImpl() {
 		CacheManager manager = CacheManager.create();
 		cache = new Cache (new CacheConfiguration("sessionCache", 0)
+		//TODO get rid of old sessions from cache
 //		.memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LFU)
 //		.eternal(false)
 //		.timeToLiveSeconds(60)
@@ -45,14 +47,31 @@ public class EhCacheSessionListImpl implements SSOActiveSessionList {
 
 	@Override
 	public SSOSession addSession(String username, String ipAddress) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public SSOSession lookupValidSession(String rdSessionId) {
-		// TODO Auto-generated method stub
-		return null;
+		logCache();
+		SSOSession session = null;
+		Element found = cache.get(rdSessionId);
+		if (found != null) {
+			session = (SSOSession) found.getObjectValue();
+            if (session.hasExpired()) {
+            	LOG.warn("Session {} found in cache BUT has expired.", rdSessionId);
+            	removeSession(rdSessionId);
+                session = null;
+            } else {
+    			LOG.debug("Session {} found in cache and is valid.", rdSessionId);
+            	session.updateTimeToNow();
+        		Element element = new Element(rdSessionId, session); 
+        		cache.put(element); // updates the cache
+            }
+		} else {
+			LOG.warn("Session {} NOT found in cache.", rdSessionId);
+		}
+		logCache();
+		return session;
 	}
 
 	@Override
@@ -70,8 +89,12 @@ public class EhCacheSessionListImpl implements SSOActiveSessionList {
 	}
 	
 	public void logCache() {
-		List<String> keys = cache.getKeys();
-    	LOG.debug("Existing keys in cache: {}", keys);
+//		List<String> keys = cache.getKeys();
+//    	LOG.debug("Existing keys in cache: {}", keys);
+		Map<Object, Element> elements = cache.getAll(cache.getKeys());
+    	LOG.debug("Existing elements in cache: {}", elements);
 	}
 
 }
+
+

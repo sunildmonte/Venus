@@ -44,6 +44,8 @@ public class ConcurrentHashMapSessionListImpl implements SSOActiveSessionList {
             if (session != null) {
                 if (session.hasExpired()) {
                     session = null;
+                } else {
+                	session.updateTimeToNow();
                 }
             }
         }

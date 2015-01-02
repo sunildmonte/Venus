@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SSOSession implements java.io.Serializable {
-    public static final long EXPIRE_AFTER_IDLE_TIME_MILLIS = 3 * 60 * 1000; // 30 minutes
+    public static final long EXPIRE_AFTER_IDLE_TIME_MILLIS = 30 * 60 * 1000; // 30x60x1000 = 30 minutes
     public static final long EXPIRE_AFTER_TOTAL_TIME_MILLIS = 8 * 60 * 60 * 1000; // 8 hours
     public static final String SSO_COOKIE_NAME = "rds";
     private transient static final Logger LOG = LoggerFactory.getLogger(SSOSession.class);
@@ -65,14 +65,14 @@ public class SSOSession implements java.io.Serializable {
                 ||
                 now < lastUpdatedDate.getTime() // should never happen, but just an extra security measure
                 ) {
-            LOG.error("SSO cookie idle time has expired, last updated time: {}", lastUpdatedDate);
+            LOG.error("SSO cookie {} idle time has expired, last updated time: {}", rdSessionID, lastUpdatedDate);
             isExpired = true;
         }
         if (now - createdDate.getTime() > EXPIRE_AFTER_TOTAL_TIME_MILLIS
                 ||
                 now < createdDate.getTime() // should never happen, but just an extra security measure
                 ) {
-            LOG.error("SSO cookie total time has expired, was created on: {}", createdDate);
+            LOG.error("SSO cookie {} total time has expired, was created on: {}", rdSessionID, createdDate);
             isExpired = true; // either of the 2 conditions should lead to expiry
         }
         return isExpired;

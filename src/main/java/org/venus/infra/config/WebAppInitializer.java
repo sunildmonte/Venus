@@ -26,6 +26,8 @@ public class WebAppInitializer
 
 		// Manage the lifecycle of the root application context
 		servletContext.addListener(new ContextLoaderListener(rootContext));
+		
+		servletContext.addListener(new SessionListener());
 
 		// Create the dispatcher servlet's Spring application context
 		AnnotationConfigWebApplicationContext dispatcherContext = new AnnotationConfigWebApplicationContext();
