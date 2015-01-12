@@ -1,20 +1,24 @@
 package org.venus.infra.config;
 
 import javax.servlet.Filter;
+import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.servlet.configuration.EnableWebMvcSecurity;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.venus.infra.web.security.AppAuthenticationProvider;
 import org.venus.infra.web.security.AuthenticationFilter;
 import org.venus.infra.web.security.sso.SSOAuthSucessHandler;
 import org.venus.infra.web.security.sso.SSOLogoutSuccessHandler;
@@ -29,16 +33,30 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //    @Autowired
 //    private AuthenticationManagerBuilder authManagerBuilder;
     
+	@Autowired
+	private DataSource datasource;
+	
+	private UserDetailsService appUserDetailsService;
+	
     // see http://stackoverflow.com/questions/19798863/authenticationmanager-when-updating-to-spring-security-3-2-0-rc2/19814105#19814105
 	@Autowired
 	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
 //    @Override
 //    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth
-             .inMemoryAuthentication()
-                  .withUser("user")
-                       .password("password")
-                       .roles("USER");
+//             .inMemoryAuthentication()
+//                  .withUser("user")
+//                       .password("password")
+//                       .roles("USER");
+//        .jdbcAuthentication()
+//	        .dataSource(datasource)
+//	        .withDefaultSchema()
+//	        .withUser("user").password("password").roles("USER").and()
+//	        .withUser("admin").password("password").roles("USER", "ADMIN");
+        
+        //.userDetailsService(appUserDetailsService)
+        .authenticationProvider(appAuthenticationProvider())
+        ;
     }
 
 	@Override
@@ -79,6 +97,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		SSOLogoutSuccessHandler handler = new SSOLogoutSuccessHandler();
 		handler.setDefaultTargetUrl("/login");
 		return handler;
+	}
+	
+	@Bean
+	public AuthenticationProvider appAuthenticationProvider() {
+		return new AppAuthenticationProvider();
 	}
 
 //	@Bean

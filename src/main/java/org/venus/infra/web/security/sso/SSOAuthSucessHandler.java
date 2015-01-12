@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.AbstractAuthenticationTargetUrlRequestHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -41,7 +42,8 @@ public class SSOAuthSucessHandler extends SimpleUrlAuthenticationSuccessHandler 
     	
 		LOG.debug("SSOAuthSucessHandler onAuthenticationSuccess() called...");
 		
-		String username = ((User) authentication.getPrincipal()).getUsername();
+//		String username = ((User) authentication.getPrincipal()).getUsername();
+		String username = ((UserDetails) authentication.getPrincipal()).getUsername();
         SSOSession rdSession = SSOSession.create(username, HttpUtils.originatingIPAddressFromRequest(request));
         sessions.addSession(rdSession);
         LOG.debug("Creating SSO cookie and adding it to response: {}", rdSession.getRdSessionID());
