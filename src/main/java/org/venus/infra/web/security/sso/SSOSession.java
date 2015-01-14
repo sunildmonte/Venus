@@ -60,17 +60,20 @@ public class SSOSession implements java.io.Serializable {
      */
     public boolean hasExpired() {
         boolean isExpired = false;
+        long createdAt = createdDate.getTime();
+        long lastUpdatedAt = lastUpdatedDate.getTime();
         long now = new Date().getTime();
-        if (now - lastUpdatedDate.getTime() > EXPIRE_AFTER_IDLE_TIME_MILLIS
+
+        if (now - lastUpdatedAt > EXPIRE_AFTER_IDLE_TIME_MILLIS
                 ||
-                now < lastUpdatedDate.getTime() // should never happen, but just an extra security measure
+                now < lastUpdatedAt // should never happen, but just an extra security measure
                 ) {
             LOG.error("SSO cookie {} idle time has expired, last updated time: {}", rdSessionID, lastUpdatedDate);
             isExpired = true;
         }
-        if (now - createdDate.getTime() > EXPIRE_AFTER_TOTAL_TIME_MILLIS
+		if (now - createdAt > EXPIRE_AFTER_TOTAL_TIME_MILLIS
                 ||
-                now < createdDate.getTime() // should never happen, but just an extra security measure
+                now < createdAt // should never happen, but just an extra security measure
                 ) {
             LOG.error("SSO cookie {} total time has expired, was created on: {}", rdSessionID, createdDate);
             isExpired = true; // either of the 2 conditions should lead to expiry

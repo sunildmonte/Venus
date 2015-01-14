@@ -15,9 +15,12 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.servlet.configuration.EnableWebMvcSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.venus.infra.web.security.AppAuthenticationProvider;
 import org.venus.infra.web.security.AuthenticationFilter;
 import org.venus.infra.web.security.sso.SSOAuthSucessHandler;
@@ -34,9 +37,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //    private AuthenticationManagerBuilder authManagerBuilder;
     
 	@Autowired
-	private DataSource datasource;
+	private DataSource dataSource;
 	
-	private UserDetailsService appUserDetailsService;
+	@Autowired
+	private UserDetailsService userDetailsService;
 	
     // see http://stackoverflow.com/questions/19798863/authenticationmanager-when-updating-to-spring-security-3-2-0-rc2/19814105#19814105
 	@Autowired
@@ -54,8 +58,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //	        .withUser("user").password("password").roles("USER").and()
 //	        .withUser("admin").password("password").roles("USER", "ADMIN");
         
-        //.userDetailsService(appUserDetailsService)
-        .authenticationProvider(appAuthenticationProvider())
+        //.authenticationProvider(appAuthenticationProvider())
+        .userDetailsService(userDetailsService)
+        .passwordEncoder(new BCryptPasswordEncoder())
+        
         ;
     }
 
@@ -73,6 +79,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	            .and()
 	        .logout()
 	        	.logoutSuccessHandler(ssoLogoutHandler())
+	        	.and()
+	        .rememberMe()
+	        	.tokenRepository(persistentTokenRepository())
+	        	.tokenValiditySeconds(1209600)
+	        	.authenticationSuccessHandler(ssoSuccessHandler())
 	         ;
 
 	    
@@ -99,11 +110,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		return handler;
 	}
 	
-	@Bean
-	public AuthenticationProvider appAuthenticationProvider() {
-		return new AppAuthenticationProvider();
-	}
+//	@Bean
+//	public AuthenticationProvider appAuthenticationProvider() {
+//		return new AppAuthenticationProvider();
+//	}
 
+	@Bean
+	public PersistentTokenRepository persistentTokenRepository() {
+		JdbcTokenRepositoryImpl db = new JdbcTokenRepositoryImpl();
+		db.setDataSource(dataSource);
+		return db;
+	}
+	
 //	@Bean
 //	public AuthenticationManager authenticationManager() {
 //		try {

@@ -39,8 +39,12 @@
             <sf:password path="password" id="password" />
         </p>
         <div>
+            Remember Me: <input type="checkbox" name="remember-me" />
+        </div>
+        <div>
             <button type="submit" class="btn">Log in</button>
         </div>
+        
     </fieldset>
  </sf:form>
 

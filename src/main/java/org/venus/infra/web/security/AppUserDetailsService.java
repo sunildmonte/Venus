@@ -36,7 +36,7 @@ public class AppUserDetailsService implements UserDetailsService {
         User u = userDao.findByUsername(username);
         LOG.debug("userDao.findByUsername {}: {}", username, u);
         if (u == null) {
-            throw new UsernameNotFoundException("User not found by repository: " + username);
+            throw new UsernameNotFoundException("User not found: " + username);
         }
         
         UserDetails userDetails = new UserDetailsAdapter(u);
