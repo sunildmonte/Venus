@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SSOSession implements java.io.Serializable {
-    public static final long EXPIRE_AFTER_IDLE_TIME_MILLIS = 30 * 60 * 1000; // 30x60x1000 = 30 minutes
+    public static final long EXPIRE_AFTER_IDLE_TIME_MILLIS = 10 * 60 * 1000; // 30x60x1000 = 30 minutes
     public static final long EXPIRE_AFTER_TOTAL_TIME_MILLIS = 8 * 60 * 60 * 1000; // 8 hours
     public static final String SSO_COOKIE_NAME = "rds";
     private transient static final Logger LOG = LoggerFactory.getLogger(SSOSession.class);

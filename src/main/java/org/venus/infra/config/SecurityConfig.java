@@ -1,5 +1,7 @@
 package org.venus.infra.config;
 
+import java.util.UUID;
+
 import javax.servlet.Filter;
 import javax.sql.DataSource;
 
@@ -20,9 +22,12 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenBasedRememberMeServices;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.venus.infra.web.security.AppAuthenticationProvider;
+import org.venus.infra.web.security.AppPersistentTokenBasedRememberMeServices;
 import org.venus.infra.web.security.AuthenticationFilter;
+import org.venus.infra.web.security.sso.RememberMeSSOAuthSucessHandler;
 import org.venus.infra.web.security.sso.SSOAuthSucessHandler;
 import org.venus.infra.web.security.sso.SSOLogoutSuccessHandler;
 
@@ -33,6 +38,11 @@ import org.venus.infra.web.security.sso.SSOLogoutSuccessHandler;
 @EnableWebMvcSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+	private static final String REMEMBER_ME_RANDOM_KEY = "0c4341db080149df8f67a66aff9482c4";
+	public static final String REMEMBER_ME_COOKIE_NAME = "rdsrm";
+	public static final String REMEMBER_ME_FORM_PARAMETER_NAME = "rm";
+	private static final int REMEMBER_ME_VALIDITY_SECONDS = 30 * 24 * 60 * 60; // 30 days
+	
 //    @Autowired
 //    private AuthenticationManagerBuilder authManagerBuilder;
     
@@ -81,9 +91,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	        	.logoutSuccessHandler(ssoLogoutHandler())
 	        	.and()
 	        .rememberMe()
-	        	.tokenRepository(persistentTokenRepository())
-	        	.tokenValiditySeconds(1209600)
-	        	.authenticationSuccessHandler(ssoSuccessHandler())
+	        	//.tokenRepository(persistentTokenRepository())
+	        	.key(REMEMBER_ME_RANDOM_KEY) // see https://lustforge.com/2012/10/17/springs-rememberme-and-badcredentialsexception
+	        	.rememberMeServices(persistentTokenBasedRememberMeServices())
+	        	//.tokenValiditySeconds(1209600)
+	        	.authenticationSuccessHandler(rememberMeSsoSuccessHandler())
 	         ;
 
 	    
@@ -104,6 +116,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
+	public AuthenticationSuccessHandler rememberMeSsoSuccessHandler() {
+		//return new SSOAuthSucessHandler("/rds");
+		return new RememberMeSSOAuthSucessHandler();
+	}
+
+	@Bean
 	public LogoutSuccessHandler ssoLogoutHandler() {
 		SSOLogoutSuccessHandler handler = new SSOLogoutSuccessHandler();
 		handler.setDefaultTargetUrl("/login");
@@ -114,6 +132,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //	public AuthenticationProvider appAuthenticationProvider() {
 //		return new AppAuthenticationProvider();
 //	}
+	
+	@Bean
+	public PersistentTokenBasedRememberMeServices persistentTokenBasedRememberMeServices() {
+		AppPersistentTokenBasedRememberMeServices rms = new AppPersistentTokenBasedRememberMeServices(
+				REMEMBER_ME_RANDOM_KEY, userDetailsService, persistentTokenRepository());
+		rms.setCookieName(REMEMBER_ME_COOKIE_NAME);
+		rms.setParameter(REMEMBER_ME_FORM_PARAMETER_NAME);
+		rms.setTokenValiditySeconds(REMEMBER_ME_VALIDITY_SECONDS);
+		return rms;
+	}
 
 	@Bean
 	public PersistentTokenRepository persistentTokenRepository() {

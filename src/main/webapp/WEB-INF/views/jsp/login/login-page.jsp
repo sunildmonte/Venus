@@ -38,9 +38,10 @@
             <label for="password">Password</label>
             <sf:password path="password" id="password" />
         </p>
-        <div>
-            Remember Me: <input type="checkbox" name="remember-me" />
-        </div>
+        <p>
+            <label for="rm">Remember Me:</label>
+            <input type="checkbox" name="rm" id="rm" />
+        </p>
         <div>
             <button type="submit" class="btn">Log in</button>
         </div>

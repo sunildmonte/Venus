@@ -22,11 +22,12 @@
     </error-page-->
 
     <session-config>
-        <session-timeout>3</session-timeout> <!-- 30 = 30 minutes -->
-        <!-- cookie-config>
-            <path>/</path>
+        <session-timeout>10</session-timeout> <!-- 30 = 30 minutes -->
+        <cookie-config>
+            <name>RDCSESSIONID</name>
+            <!-- path>/</path-->
             <http-only>true</http-only>
-        </cookie-config-->
+        </cookie-config>
     </session-config>
 
     
