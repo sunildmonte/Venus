@@ -39,6 +39,9 @@ ext {
     HSQLDB_VERSION = '2.3.2'
     JAVAX_EL_VERSION = '3.0.0'
     GLASSFISH_JAVAX_EL_VERSION = '3.0.0'
+	
+	JACKSON_VERSION = '1.9.13'
+	JACKSON_DATABIND_VERSION = '2.5.0'
 }
 
 dependencies {
@@ -96,6 +99,13 @@ dependencies {
 
     providedCompile 'org.jboss.spec.javax.servlet:jboss-servlet-api_3.1_spec:1.0.0.Final'
     providedCompile "javax:javaee-web-api:$JAVA_EE_WEB_VERSION"
+	
+	// for json
+	compile "org.codehaus.jackson:jackson-mapper-asl:$JACKSON_VERSION"
+	compile "com.fasterxml.jackson.core:jackson-databind:$JACKSON_DATABIND_VERSION"
+	
+	
+
 }
 
 // disables javac compile warnings - because Spring's PropertySource gives a "java.lang.annotation.Repeatable not found" warning
