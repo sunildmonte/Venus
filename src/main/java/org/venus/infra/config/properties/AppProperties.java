@@ -77,6 +77,10 @@ public class AppProperties {
         return env.getProperty(APPLICATION_BUILD_PROPERTY, DEFAULT_NA);
     }
 
+    public String getProperty(String propertyKey) {
+        return env.getProperty(propertyKey);
+    }
+
 }
 
 

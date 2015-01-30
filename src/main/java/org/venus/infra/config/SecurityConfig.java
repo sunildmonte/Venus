@@ -24,6 +24,8 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenBasedRememberMeServices;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRepository;
+import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 import org.venus.infra.web.security.AppAuthenticationProvider;
 import org.venus.infra.web.security.AppPersistentTokenBasedRememberMeServices;
 import org.venus.infra.web.security.AuthenticationFilter;
@@ -81,6 +83,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	        .authorizeRequests()
 	        	.antMatchers("/rds").permitAll()
 	        	.antMatchers("/user.json").permitAll()
+	        	.antMatchers("/googlelogin").anonymous() //TODO what is the difference
 	            .anyRequest().authenticated()
 	            .and()
 	        .formLogin()
@@ -97,6 +100,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	        	.rememberMeServices(persistentTokenBasedRememberMeServices())
 	        	//.tokenValiditySeconds(1209600)
 	        	.authenticationSuccessHandler(rememberMeSsoSuccessHandler())
+	        	.and()
+	        .csrf()
+	        	.csrfTokenRepository(csrfTokenRepository())
 	         ;
 
 	    
@@ -149,6 +155,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		JdbcTokenRepositoryImpl db = new JdbcTokenRepositoryImpl();
 		db.setDataSource(dataSource);
 		return db;
+	}
+	
+	@Bean
+	public CsrfTokenRepository csrfTokenRepository() {
+		HttpSessionCsrfTokenRepository repos = new HttpSessionCsrfTokenRepository();
+		return repos;
 	}
 	
 //	@Bean

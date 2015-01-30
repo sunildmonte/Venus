@@ -42,6 +42,10 @@ ext {
 	
 	JACKSON_VERSION = '1.9.13'
 	JACKSON_DATABIND_VERSION = '2.5.0'
+	
+	GOOGLE_CLIENT_API_VERSION = '1.19.1'
+	GOOGLE_PLUS_API_VERSION = 'v1-rev207-1.19.1'
+	
 }
 
 dependencies {
@@ -104,7 +108,8 @@ dependencies {
 	compile "org.codehaus.jackson:jackson-mapper-asl:$JACKSON_VERSION"
 	compile "com.fasterxml.jackson.core:jackson-databind:$JACKSON_DATABIND_VERSION"
 	
-	
+	compile "com.google.api-client:google-api-client:$GOOGLE_CLIENT_API_VERSION"
+	compile "com.google.apis:google-api-services-plus:$GOOGLE_PLUS_API_VERSION"
 
 }
 
